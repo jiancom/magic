@@ -1,0 +1,84 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'war'
+
+description='magic是一个管理类程序快速开发框架'
+group = 'com.resgain'
+version = new Version(major: 0, minor:1, revision:0)
+
+def springVersion = "3.2.3.RELEASE"
+def springSecurityVersion = "3.1.4.RELEASE"
+def hibernateVersion = "4.2.2.Final"
+
+sourceCompatibility=1.7
+targetCompatibility=1.7
+
+repositories {
+	mavenCentral()
+    mavenRepo url: 'http://www.springsource.com/repository/'
+    mavenRepo url: 'https://repository.jboss.org/nexus/content/repositories/releases/'
+    mavenRepo url: 'http://code.alibabatech.com/mvn/releases/'
+    mavenRepo url: 'http://maven.mashape.com/releases'
+}
+
+eclipse.classpath.sourceSets*.java.srcDirs*.each { it.mkdirs() }
+eclipse.classpath.sourceSets*.resources.srcDirs*.each { it.mkdirs() }
+eclipse.classpath.defaultOutputDir(new File("$rootDir/web/WEB-INF/classes"))
+
+war {
+    from "$rootDir/web"
+}
+
+dependencies {
+
+    compile("org.slf4j:slf4j-api:+")
+    compile("ch.qos.logback:logback-classic:+")
+	compile("com.alibaba:druid:+")
+	compile("org.apache.velocity:velocity:+")
+	compile("cglib:cglib-nodep:+")
+	compile("org.mvel:mvel2:+")
+	compile("org.jsoup:jsoup:+")
+	compile("org.jodd:jodd-bean:+")
+	compile("com.alibaba:fastjson:+")
+	compile("commons-fileupload:commons-fileupload:+")
+	compile('com.google.guava:guava:+')
+	compile('org.jasypt:jasypt-springsecurity3:1.9.2')
+	compile('org.jasypt:jasypt-hibernate4:1.9.2')
+
+	compile("org.aspectj:aspectjrt:+")
+
+	compile("org.springframework:spring-tx:$springVersion")
+	compile("org.springframework:spring-jdbc:$springVersion")
+	compile("org.springframework:spring-orm:$springVersion")
+	compile("org.springframework:spring-aop:$springVersion")
+	compile("org.springframework:spring-oxm:$springVersion")
+	compile("org.springframework:spring-aspects:$springVersion")
+
+	compile("org.springframework.security:spring-security-core:$springSecurityVersion")
+	compile("org.springframework.security:spring-security-web:$springSecurityVersion")
+	compile("org.springframework.security:spring-security-config:$springSecurityVersion")
+
+	compile("org.hibernate:hibernate-core:$hibernateVersion")
+	compile("org.hibernate:hibernate-entitymanager:$hibernateVersion")
+	compile("org.hibernate:hibernate-ehcache:$hibernateVersion")
+
+	compile("mysql:mysql-connector-java:+")
+
+    providedCompile 'javax.servlet:javax.servlet-api:+'
+
+	testCompile "junit:junit:+"
+    testCompile "org.springframework:spring-test:+"
+
+    testRuntime "org.eclipse.jetty:jetty-annotations:+"
+    testRuntime "org.eclipse.jetty:jetty-webapp:+"
+    testRuntime "org.eclipse.jetty:jetty-jsp:+"
+}
+
+class Version {
+    int major, minor = 0, revision = 0
+    String stage
+
+    String toString() {
+        "$major.$minor.$revision${stage ? '.' + stage : ''}"
+    }
+}

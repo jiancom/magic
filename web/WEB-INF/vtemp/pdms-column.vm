@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>magic</title>
+	<link rel="stylesheet" href="$!{webapp}/css/bootstrap.min.css">
+	<link rel="stylesheet" href="$!{webapp}/css/bootswatch.css">
+	<link rel="stylesheet" href="$!{webapp}/css/style.css">
+	<script src="$!{webapp}/js/jquery.js"></script>
+	<script src="$!{webapp}/js/jquery.form.js"></script>
+	<script src="$!{webapp}/js/bootstrap.js"></script>
+	<script src="$!{webapp}/js/magic.js"></script>
+ 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+</head>
+<body>
+#if($vt.isLogin())
+	<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle" data-toggle="collapse"
+					data-target=".navbar-collapse">
+					<span class="sr-only">导航</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand" href="#">Magic</a>
+			</div>
+			<div class="navbar-collapse collapse" id="navbar-main">
+				<ul class="nav navbar-nav">
+<!-- 					<li><a href="#" class="dropdown-toggle" data-toggle="dropdown">系统管理<b class="caret"></b></a>
+						<ul class="dropdown-menu">
+							<li><a href="#">用户管理</a></li>
+							<li><a href="#">部门管理</a></li>
+							<li><a href="#">角色管理</a></li>
+							<li><a href="#">字典管理</a></li>
+							<li><a href="#">菜单管理</a></li>
+						</ul>
+					</li> -->
+					<li><a href="/menus">菜单管理</a></li>
+					<li><a href="/dicts">字典管理</a></li>
+					<li><a href="/auths">权限管理</a></li>
+					<li><a href="/apis">API管理</a></li>
+					<li><a href="/modules">模块管理</a></li>
+					<li><a href="/pdms">PDM管理</a></li>
+				</ul>
+				<ul class="nav navbar-nav navbar-right">
+					<li><a class="btn" href="#"><span class="glyphicon glyphicon-user"></span>$!{vt.getLoginUser().username}</a></li>
+					<li><a class="btn" href="#"><span class="glyphicon glyphicon-log-out"></span>退出</a></li>
+	          </ul>
+        	</div>
+		</div>
+	</div>
+#end
+	<div class="container" style="padding-top: 3px;padding-left: 0px;padding-right: 0px;">
+	#if($vt.isLogin() && $Breadcrumb)
+		<ol class="breadcrumb">
+		 	#foreach($crumb in $breadcrumb.breadcrumb.entrySet())
+				<li> #if($foreach.hasNext )<a href="$crumb.value.url">$crumb.value.title</a><span class="divider"> / </span> #else $crumb.value.title #end</li>
+			#end
+		</ol>
+	#end
+		<div class="panel panel-default" style="height: 100%;">
+	<div class="panel-heading">
+		<span class="glyphicon glyphicon-th"></span>PDM管理
+	</div>
+	<div class="panel-body">
+
+		<table class="table table-hover table-striped table-condensed">
+			<thead>
+				<tr>
+					<th>表名称</th>
+					<th>表含义</th>
+				</tr>
+			</thead>
+			<tbody>
+			#if(!$tableList.isEmpty())
+				#foreach($table in $tableList)
+				<tr>
+					<td>$!{table.code}</td>
+					<td>$!{table.name}</td>
+				</tr>
+				#end
+			#else
+				<tr>
+					<td colspan="2">暂无表记录，请上传一个PDM文件。</td>
+				</tr>
+			#end
+			</tbody>
+			<tfoot>
+				<tr>
+					<td style="text-align: right;" colspan="5">
+						<form id="pdmupload_form" class="ajaxform" action="$!{webapp}/pdms!upload" method="post" enctype="application/x-www-form-urlencoded" tu="$!{webapp}/pdms">
+							<input type="file" id="pdm_file" name="pdm" style="display: none;"/>
+							<a id="pdm_upload" class="btn btn-sm btn-primary">上传PDM文件</a>
+						</form>
+					</td>
+				</tr>
+			</tfoot>
+		</table>
+	</div>
+</div>
+<script>
+	$("#pdm_upload").click(function(){
+		if(${tableList.size()}>0){
+			if(!confirm("上传PDM文件将导致以前的表信息被删除，您确认吗？"))
+				return;
+		}
+		$("#pdm_file").val("");
+		$("#pdm_file").click();
+		return false;
+	});
+	$("#pdm_file").change(function(){
+		if($("#pdm_file").val()!="")
+			$("#pdmupload_form").submit();
+	})
+</script>
+	</div>
+</body>
+</html>

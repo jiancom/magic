@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>magic</title>
+	<link rel="stylesheet" href="$!{webapp}/css/bootstrap.min.css">
+	<link rel="stylesheet" href="$!{webapp}/css/bootswatch.css">
+	<link rel="stylesheet" href="$!{webapp}/css/style.css">
+	<script src="$!{webapp}/js/jquery.js"></script>
+	<script src="$!{webapp}/js/jquery.form.js"></script>
+	<script src="$!{webapp}/js/bootstrap.js"></script>
+	<script src="$!{webapp}/js/magic.js"></script>
+ 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+</head>
+<body>
+#if($vt.isLogin())
+	<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle" data-toggle="collapse"
+					data-target=".navbar-collapse">
+					<span class="sr-only">导航</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand" href="#">Magic</a>
+			</div>
+			<div class="navbar-collapse collapse" id="navbar-main">
+				<ul class="nav navbar-nav">
+<!-- 					<li><a href="#" class="dropdown-toggle" data-toggle="dropdown">系统管理<b class="caret"></b></a>
+						<ul class="dropdown-menu">
+							<li><a href="#">用户管理</a></li>
+							<li><a href="#">部门管理</a></li>
+							<li><a href="#">角色管理</a></li>
+							<li><a href="#">字典管理</a></li>
+							<li><a href="#">菜单管理</a></li>
+						</ul>
+					</li> -->
+					<li><a href="/menus">菜单管理</a></li>
+					<li><a href="/dicts">字典管理</a></li>
+					<li><a href="/auths">权限管理</a></li>
+					<li><a href="/apis">API管理</a></li>
+					<li><a href="/modules">模块管理</a></li>
+					<li><a href="/pdms/tables">PDM管理</a></li>
+				</ul>
+				<ul class="nav navbar-nav navbar-right">
+					<li><a class="btn" href="#"><span class="glyphicon glyphicon-user"></span>$!{vt.getLoginUser().username}</a></li>
+					<li><a class="btn" href="#"><span class="glyphicon glyphicon-log-out"></span>退出</a></li>
+	          </ul>
+        	</div>
+		</div>
+	</div>
+#end
+	<div class="container" style="padding-top: 3px;padding-left: 0px;padding-right: 0px;">
+	#if($vt.isLogin() && $Breadcrumb)
+		<ol class="breadcrumb">
+		 	#foreach($crumb in $breadcrumb.breadcrumb.entrySet())
+				<li> #if($foreach.hasNext )<a href="$crumb.value.url">$crumb.value.title</a><span class="divider"> / </span> #else $crumb.value.title #end</li>
+			#end
+		</ol>
+	#end
+		<div class="panel panel-default">
+	<div class="panel-heading">
+		<span class="glyphicon glyphicon-th-large"></span>模块管理
+	</div>
+	<div class="panel-body">
+
+		<div class="btn-toolbar" role="toolbar">
+			<div class="btn-group">
+				<button type="button" class="btn btn-primary btn-sm" role="button">新增模块</button>
+				<button type="button" class="btn btn-danger btn-sm" role="button">删除所选</button>
+			</div>
+		</div>
+		<table class="table table-hover table-striped table-condensed">
+			<thead>
+				<tr>
+					<th width="15"><input type="checkbox" /></th>
+					<th>模块名</th>
+					<th>要求权限</th>
+					<th>参数</th>
+					<th width="120">操作</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td><input type="checkbox" /></td>
+					<td>模块名</td>
+					<td>权限</td>
+					<td>参数</td>
+					<td><a href="#" class="btn btn-sm btn-default">修改</a> <a href="#" class="btn btn-sm btn-default">删除</a></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+	</div>
+</body>
+</html>

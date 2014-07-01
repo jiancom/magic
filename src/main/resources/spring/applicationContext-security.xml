@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<b:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:b="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+
+    <global-method-security pre-post-annotations="enabled" />
+
+    <http pattern="/favicon.ico" security="none"/>
+    <http pattern="/css/**" security="none"/>
+    <http pattern="/fonts/**" security="none"/>
+    <http pattern="/js/**" security="none"/>
+    <http pattern="/images/**" security="none"/>
+    <http pattern="/login" security="none"/>
+    <http pattern="/logout" security="none"/>
+    <http pattern="/index.html" security="none"/>
+
+	<http use-expressions="true" auto-config='true'>
+		<form-login login-page="/login" default-target-url="/main" always-use-default-target='false' authentication-success-handler-ref="authenticationHandler" authentication-failure-handler-ref="authenticationHandler"/>
+		<remember-me key="RESGAIN-BASE-2013" services-ref="rememberMeServices" />
+		<custom-filter before="FILTER_SECURITY_INTERCEPTOR" ref="resgainFilter"/>
+	</http>
+
+	<!-- 用PBEWithMD5AndDES -->
+	<!--
+	<b:bean id="jasyptPBEStringEncryptor" class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor" >
+	   <b:property name="algorithm" value="PBEWithMD5AndDES" />
+	   <b:property name="password" value="resgain" />
+	</b:bean>
+	<b:bean id="passwordEncoder" class="org.jasypt.springsecurity3.authentication.encoding.PBEPasswordEncoder">
+	  	<b:property name="pbeStringEncryptor">
+			<b:ref bean="jasyptPBEStringEncryptor" />
+	  	</b:property>
+	</b:bean>
+	-->
+
+	<authentication-manager alias="authenticationManager">
+		<authentication-provider user-service-ref="resgainSecurityUserService">
+			<!-- <password-encoder hash="plaintext" /> -->
+			<password-encoder hash="sha"/>
+			<!-- <password-encoder ref="passwordEncoder"/> -->
+		</authentication-provider>
+	</authentication-manager>
+
+	<b:bean id="resgainFilter" class="com.resgain.base.security.filter.ResgainSecurityFilter">
+		<b:property name="authenticationManager" ref="authenticationManager" />
+		<b:property name="accessDecisionManager" ref="resgainAccessDecisionManager" />
+	</b:bean>
+
+	<!-- 资源源数据定义，即定义某一资源可以被哪些角色访问 -->
+	<b:bean id="securityMetadataSource" class="com.resgain.base.security.filter.ResgainInvocationSecurityMetadataSource" />
+
+	<b:bean id="rememberMeServices" class="org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices">
+		<b:property name="userDetailsService" ref="resgainSecurityUserService" />
+		<b:property name="cookieName" value="RESGAIN-BASE" />
+		<b:property name="key" value="RESGAIN-BASE-2013"/>
+		<b:property name="tokenValiditySeconds" value="2592000" />
+	</b:bean>
+
+</b:beans>

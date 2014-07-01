@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jee="http://www.springframework.org/schema/jee" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cache="http://www.springframework.org/schema/cache"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.2.xsd   http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd   http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.2.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.2.xsd  http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache-3.2.xsd">
+
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:jdbc.properties</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+		<!-- 基本属性 url、user、password -->
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+
+		<!-- 配置初始化大小、最小、最大 -->
+		<property name="initialSize" value="${jdbc.initialSize}" />
+		<property name="minIdle" value="1" />
+		<property name="maxActive" value="${jdbc.maxActive}" />
+
+		<!-- 配置获取连接等待超时的时间 -->
+		<property name="maxWait" value="${jdbc.maxWait}" />
+
+		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+		<property name="timeBetweenEvictionRunsMillis" value="60000" />
+
+		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+		<property name="minEvictableIdleTimeMillis" value="300000" />
+
+		<property name="validationQuery" value="SELECT 'x'" />
+		<property name="testWhileIdle" value="true" />
+		<property name="testOnBorrow" value="false" />
+		<property name="testOnReturn" value="false" />
+
+		<!-- 打开PSCache，并且指定每个连接上PSCache的大小 -->
+		<property name="poolPreparedStatements" value="false" />
+		<property name="maxPoolPreparedStatementPerConnectionSize" value="20" />
+
+		<!-- 配置监控统计拦截的filters -->
+		<property name="filters" value="stat" />
+	</bean>
+
+	<bean id="hibernateProperties"
+		class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+		<property name="properties">
+			<props>
+				<prop key="hibernate.dialect">${hibernate.dialect}</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<!-- <prop key="hibernate.hbm2ddl.auto">update</prop> -->
+				<prop key="hibernate.default_batch_fetch_size">30</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="strongEncryptor" class="org.jasypt.encryption.pbe.PooledPBEStringEncryptor">
+	    <property name="algorithm">
+	        <value>PBEWithMD5AndDES</value><!-- PBEWithMD5AndTripleDES PBEWithHmacSHA1AndAES_128-->
+	    </property>
+	    <property name="password">
+	        <value>resgain</value>
+	    </property>
+	    <property name="poolSize">
+	        <value>4</value>
+	    </property>
+	</bean>
+
+  <bean id="hibernateStringEncryptor" class="org.jasypt.hibernate4.encryptor.HibernatePBEStringEncryptor">
+    <property name="registeredName">
+        <value>strongHibernateStringEncryptor</value>
+    </property>
+    <property name="encryptor">
+        <ref bean="strongEncryptor" />
+    </property>
+  </bean>
+
+	<!-- Hibernate SessionFactory -->
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="packagesToScan">
+			<list>
+				<value>com.resgain.**.entity</value>
+			</list>
+		</property>
+		<property name="entityInterceptor">
+			<bean class="com.resgain.base.interceptor.HibernateInterceptor" />
+		</property>
+		<property name="mappingResources">
+			<list>
+			</list>
+		</property>
+		<property name="hibernateProperties">
+			<ref bean="hibernateProperties" />
+		</property>
+	</bean>
+
+	<!-- 方便直接调用JdbcTemplate -->
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<constructor-arg ref="dataSource" />
+	</bean>
+
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+
+	<aop:config proxy-target-class="true">
+		<!-- AOP事务处理 -->
+		<aop:advisor id="managerTx1" advice-ref="txAdvice" pointcut="execution(* com.resgain..*Service.*(..))" />
+	</aop:config>
+
+	<!-- Enable @Transactional support -->
+	<tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true" />
+
+	<!-- Enable @AspectJ support -->
+	<aop:aspectj-autoproxy />
+
+	<tx:advice id="txAdvice">
+		<tx:attributes>
+			<tx:method name="get*" read-only="true" />
+			<tx:method name="find*" read-only="true" />
+			<tx:method name="*" />
+		</tx:attributes>
+	</tx:advice>
+
+	<!-- 启用缓存注解功能，该注解一定要声明在spring主配置文件中才会生效 -->
+	<cache:annotation-driven cache-manager="cacheManager"/>
+	<!-- spring自己的换管理器，这里定义了两个缓存位置名称 ，既注解中的value -->
+	<bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
+	    <property name="caches">
+	        <set>
+	            <bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="dictCache" />
+	            <bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="deptCache" />
+	        </set>
+	    </property>
+	</bean>
+
+<!-- cacheManager工厂类，指定ehcache.xml的位置 -->
+<!-- <bean id="cacheManagerFactory" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" p:configLocation="classpath:/config/ehcache.xml" /> -->
+<!-- 声明cacheManager -->
+<!-- <bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager" p:cacheManager-ref="cacheManagerFactory" /> -->
+
+	<context:component-scan base-package="com.resgain" />
+</beans>

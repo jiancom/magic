@@ -1,0 +1,32 @@
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<span class="glyphicon glyphicon-tower"></span>权限管理
+	</div>
+	<div class="panel-body">
+
+		<div class="btn-toolbar" role="toolbar">
+			<div class="btn-group">
+				<button type="button" class="btn btn-primary btn-sm" role="button">新增权限</button>
+				<button type="button" class="btn btn-danger btn-sm" role="button">删除所选</button>
+			</div>
+		</div>
+		<table class="table table-hover table-striped table-condensed">
+			<thead>
+				<tr>
+					<th width="15"><input type="checkbox" /></th>
+					<th>权限名称</th>
+					<th>权限代码</th>
+					<th width="120">操作</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td><input type="checkbox" /></td>
+					<td>权限名称</td>
+					<td>权限代码</td>
+					<td><a href="#" class="btn btn-sm btn-default">修改</a> <a href="#" class="btn btn-sm btn-default">删除</a></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
